@@ -1,24 +1,4 @@
-# NHS Elective Care Decision Intelligence Concept Prototype
-
-<!-- SITES_WEB_EDITION_LINK -->
-
-**Latest web edition:** [interactive website source](web/index.html).
-**Sites publication pending:** the website files are complete, but a live Sites
-deployment has not been established. Run `python -m http.server 8080 --directory web`
-from the repository root to open the website at `http://localhost:8080`.
-
-The **November 2026 web edition** adds an interactive, dark blue scenario explorer,
-transparent assumptions, source provenance and engineering documentation. Its
-browser examples are explicitly synthetic; the original Python analytics, data
-schema and Next.js application remain the full analytical implementation.
-
-- [Web edition source](web/index.html)
-- [Engineering decisions, deployment architecture and verification](docs/web-edition-and-engineering.md)
-- [Original system architecture](docs/architecture.md)
-
-The scenario engine now requires a complete recent three-month activity window.
-Missing observations no longer cause older activity to be silently substituted.
-Regression cases cover missing months, invalid activity and non-finite uplift.
+# NHS Elective Flow Intelligence
 
 [Architecture](docs/architecture.md) · [Maintenance and scaling review](docs/maintenance-and-scaling.md)
 
@@ -32,23 +12,31 @@ forecasting and capacity scenario modelling.
 > NHS England or any NHS organisation. Not a clinical decision support, triage or
 > diagnosis system. Uses only aggregate, published, non-patient-identifiable statistics.
 
-## Demo and deployment status
+## Live website and deployment
 
-The repository records a frontend deployment on 19 August 2026. That deployment
-commit explicitly states that the backend was not yet hosted. The Render blueprint
-and configured API URL are deployment preparation, not evidence of a running API.
-Current end-to-end availability has not been verified for this revision.
+**[Open NHS Elective Flow Intelligence](https://nhs-elective-flow-intelligence.vercel.app)**
 
-| Component | URL | Evidence status |
+The original application is the Next.js dashboard in `frontend/`, backed by the
+FastAPI analytics service in `backend/`. The Vercel frontend has a production
+deployment marked READY, checked on 15 November 2026. That hosting state does not
+by itself establish that the separate API or data warehouse is available.
+
+| Component | Link | Boundary |
 |---|---|---|
-| Frontend | https://nhs-elective-flow-intelligence.vercel.app | Deployment recorded; current availability unverified |
-| API docs (configured destination) | https://nhs-elective-flow-api.onrender.com/docs | Backend deployment unverified |
-| API health (configured destination) | https://nhs-elective-flow-api.onrender.com/health | Check before presenting a working full-stack demo |
+| Vercel dashboard | [Open website](https://nhs-elective-flow-intelligence.vercel.app) | Original Next.js frontend; analytical pages need the API |
+| Configured API documentation | [OpenAPI](https://nhs-elective-flow-api.onrender.com/docs) | Separate Render service; current API availability is not established by the Vercel deployment |
+| Configured API health | [Health endpoint](https://nhs-elective-flow-api.onrender.com/health) | Check warehouse readiness before demonstrating analytical results |
 
-The frontend retries GET requests and displays unavailable-data states. Those
-behaviours also apply when a backend is absent; a loading or retry state does not
-prove that a sleeping service will eventually respond.
+The frontend retries GET requests and displays unavailable-data states. A loading
+or retry state does not prove that the API will eventually respond. For a
+reproducible local demonstration, follow **Running locally** below and build a
+labelled synthetic warehouse with `make demo`.
 
+The repository retains its original ingestion pipeline, data model, forecasting,
+priority scoring, scenario analysis and dashboard. The separate static website
+rebuild introduced on 14 November 2026 has been removed. The narrow Python
+scenario input-validation correction is retained because incomplete recent
+activity must not be replaced silently with older observations.
 ---
 
 ## The problem
@@ -346,6 +334,11 @@ Enforced invariants (all covered by tests):
 - Scenario backlog is **floored at zero**
 - Effect accumulates with horizon
 
+Activity uses a complete three-calendar-month window ending at the latest reporting
+month. Missing months, duplicate months, missing or negative activity, and non-finite
+values produce an unavailable scenario instead of borrowing older observations.
+Non-finite uplift is rejected; finite uplift remains bounded to 0–100%.
+
 Stated assumptions travel with every result: referral behaviour, case mix, clinical
 urgency and validation practice are assumed unchanged; workforce, theatre, estate and
 diagnostic constraints are not represented; the model does not assess whether an uplift
@@ -573,12 +566,9 @@ make the product trustworthy:
 
 Warehouse-dependent API tests skip themselves when no warehouse is built. CI runs
 the suite first on a clean checkout, then again after the synthetic demo pipeline
-and warehouse materialisation. Those backend checks passed in the inspected
-historical runs; the overall workflow failed during the frontend Docker image
-build because an optional `public/` directory was absent. The Dockerfile now
-creates that directory before building. A new CI run is required to verify the
-corrected image build; historical passing tests do not establish a green current
-workflow.
+and warehouse materialisation, and builds the frontend and Docker images. Inspect
+the workflow for the exact revision being demonstrated; historical results and a
+READY frontend deployment do not establish current full-stack health.
 
 ---
 
@@ -636,5 +626,6 @@ CSV exports carry this notice in their header.
 affiliated with or endorsed by NHS England. Source: NHS England, Consultant-led
 Referral to Treatment Waiting Times. Contains public sector information licensed under
 the Open Government Licence v3.0.*
+
 
 **Year provenance:** The `2026` suffix records this repository's creation year (created 2026-08-19). Later maintenance retains its own dates.

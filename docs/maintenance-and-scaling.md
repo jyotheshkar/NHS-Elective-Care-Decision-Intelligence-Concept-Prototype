@@ -69,3 +69,24 @@ The existing CI also builds a synthetic warehouse, validates it, reruns API test
 and builds the frontend and Docker images. For a failed source download, inspect
 the audit result, retry explicitly, and retain the last validated snapshot. A
 successful HTTP response is not evidence of a valid warehouse or a healthy UI.
+
+## Scenario validation and original application restoration
+
+On 15 November 2026, the separate `web/` scenario presentation, its workflow and
+its dedicated engineering write-up were removed to restore the original
+application's scope. The source for the original Next.js dashboard, Python
+analytics, warehouse, scripts and deployment configuration remains in place.
+
+The 14 November correction in `backend/app/scenarios/engine.py` is retained.
+Recent activity means a complete three-calendar-month window, with exactly one
+finite, non-negative observation for each month. Missing dates, gaps, duplicates
+and invalid values produce `no_activity_data`; a zero mean remains unavailable.
+Non-finite uplift raises `ValueError`, while finite values retain the existing
+0–100% clamp. The accompanying scenario regression tests remain in
+`backend/tests/test_scenarios.py`.
+
+The Vercel website is
+[nhs-elective-flow-intelligence.vercel.app](https://nhs-elective-flow-intelligence.vercel.app).
+Its production deployment was marked READY on 15 November 2026. The separate
+Render API and warehouse still require independent health checks; see the
+README's deployment table and local demonstration commands.
