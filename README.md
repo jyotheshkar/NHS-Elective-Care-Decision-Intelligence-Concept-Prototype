@@ -37,6 +37,7 @@ priority scoring, scenario analysis and dashboard. The separate static website
 rebuild introduced on 14 November 2026 has been removed. The narrow Python
 scenario input-validation correction is retained because incomplete recent
 activity must not be replaced silently with older observations.
+
 ---
 
 ## The problem
